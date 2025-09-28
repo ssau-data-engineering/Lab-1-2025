@@ -1,0 +1,23 @@
+name: data-engineering-lab
+
+deployments:
+  - name: prod-weather-etl
+    description: weather-etl-every-5-minutes
+
+    entrypoint: etl_flow.py:weather_etl_flow
+
+    schedule:
+      cron: "*/5 * * * *"
+
+    work_pool:
+      name: local-pool
+
+    pull:
+      - prefect.deployments.steps.git_clone:
+          id: clone-step
+          repository: https://github.com/nikitanosov1/data-engineering-lab-1.git
+          branch: main
+      - prefect.deployments.steps.pip_install_requirements:
+          requirements_file: requirements.txt
+          directory: "{{ clone-step.directory }}"
+          stream_output: False
